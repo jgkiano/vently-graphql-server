@@ -1,0 +1,35 @@
+{
+  "name": "vently-graphql-server",
+  "version": "1.0.0",
+  "description": "GraphQL server for vently",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/julezKiano/vently-graphql-server.git"
+  },
+  "author": "Julius Kiano",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/julezKiano/vently-graphql-server/issues"
+  },
+  "homepage": "https://github.com/julezKiano/vently-graphql-server#readme",
+  "dependencies": {
+    "axios": "^0.17.1",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.2",
+    "casual": "^1.5.19",
+    "express": "^4.16.2",
+    "express-graphql": "^0.6.11",
+    "graphql": "^0.12.3",
+    "jsonwebtoken": "^8.1.0",
+    "moment": "^2.20.1",
+    "mongoose": "^4.13.9"
+  },
+  "devDependencies": {
+    "nodemon": "^1.14.10"
+  }
+}

@@ -62,6 +62,7 @@ const genMock = (single, mockType) => {
 
 const getUser = () => ({
     _id: casual.uuid,
+    username: casual.username,
     firstName: casual.first_name,
     lastName: casual.last_name,
     phoneNumber: casual.phone,

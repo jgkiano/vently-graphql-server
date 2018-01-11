@@ -1,6 +1,12 @@
 const graphql = require('graphql');
 const casual = require('casual');
 const mock = require('./mock');
+const controllers = require('./db/controllers');
+
+const {
+    interest,
+    user
+} = controllers;
 
 const {
     GraphQLObjectType,
@@ -9,13 +15,15 @@ const {
     GraphQLString,
     GraphQLInt,
     GraphQLBoolean,
-    GraphQLList
+    GraphQLList,
+    GraphQLNonNull
 } = graphql;
 
 const UserType = new GraphQLObjectType({
     name: 'UserType',
     fields: () => ({
         _id: { type: GraphQLID },
+        userName: { type: GraphQLString },
         firstName: { type: GraphQLString },
         lastName: { type: GraphQLString },
         phoneNumber: { type: GraphQLString },
@@ -191,6 +199,13 @@ const InterestType = new GraphQLObjectType({
     })
 });
 
+const TokenType = new GraphQLObjectType({
+    name: 'TokenType',
+    fields: () => ({
+        token: { type: GraphQLString }
+    })
+});
+
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
@@ -239,7 +254,43 @@ const RootQuery = new GraphQLObjectType({
     }
 });
 
+const mutation = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+        createInterest: {
+            type: InterestType,
+            args: {
+                name: { type: GraphQLNonNull(GraphQLString) },
+            },
+            resolve: interest.createInterest
+        },
+        updateInterest: {
+            type: InterestType,
+            args: {
+                _id: { type: GraphQLNonNull(GraphQLID) },
+                name: { type: GraphQLNonNull(GraphQLString) },
+            },
+            resolve: interest.updateInterest
+        },
+        createUser: {
+            type: TokenType,
+            args: {
+                userName: { type: GraphQLNonNull(GraphQLString) },
+                firstName: { type: GraphQLNonNull(GraphQLString) },
+                lastName: { type: GraphQLNonNull(GraphQLString) },
+                phoneNumber: { type: GraphQLNonNull(GraphQLString) },
+                email: { type: GraphQLNonNull(GraphQLString) },
+                password: { type: GraphQLNonNull(GraphQLString) },
+                gender: { type: GraphQLNonNull(GraphQLString) },
+                interests: { type: GraphQLList(GraphQLString) },
+            },
+            resolve: user.createUser
+        }
+    }
+});
 
 
 
-module.exports = RootQuery;
+
+
+module.exports = { RootQuery, mutation };

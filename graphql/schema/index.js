@@ -4,6 +4,6 @@ const {
     GraphQLSchema,
 } = graphql;
 
-const RootQuery = require('./root');
+const { RootQuery, mutation } = require('./root');
 
-module.exports = new GraphQLSchema({ query: RootQuery });
+module.exports = new GraphQLSchema({ query: RootQuery, mutation });

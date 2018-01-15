@@ -211,10 +211,12 @@ const RootQuery = new GraphQLObjectType({
     fields: {
         user: {
             type : UserType,
-            args: { _id: { type: GraphQLID } },
-            resolve (parentValue, args, context) {
-                return mock.users(true);
-            }
+            args: { _id: { type: GraphQLNonNull(GraphQLID) } },
+            resolve: user.readUser
+        },
+        users: {
+            type : GraphQLList(UserType),
+            resolve: user.readUser
         },
         event: {
             type: EventType,

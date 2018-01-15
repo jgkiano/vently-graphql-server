@@ -30,6 +30,11 @@ user.createUser = async (parentValue, args, context) => {
     throw new Error(error);
 }
 
+user.readUser = async (parentValue, { _id }, context) => {
+    if(_id) { return User.findById(_id); }
+    return User.find({});
+}
+
 user.updateUser = async (parentValue, args, context) => {
     const { _id, userName, firstName, lastName, phoneNumber, email, password, gender, interests } = args;
     let res = null;

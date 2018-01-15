@@ -1,5 +1,8 @@
-const models = require('./models');
 const _ = require('lodash');
+const crypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const config = require('./config');
+const models = require('./models');
 
 const {
     User,
@@ -7,9 +10,67 @@ const {
 } = models;
 
 const user = {};
-
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhNWNjYzQzODc5MWQ5MDM4NTM0M2M4ZiIsImlhdCI6MTUxNjAzMTA0NCwiZXhwIjoxNTE2MTE3NDQ0fQ.BNp5w1Je6dQhKJrBkGvkFvJ6-6QubrSEGgIazmrE0-w
 user.createUser = async (parentValue, args, context) => {
-    console.log(await validateProvidedUserInfo(args));
+    const { success, error } = await validateProvidedUserInfo(args);
+    if(success) {
+        try {
+            const salt = await crypt.genSalt(10);
+            const hash = await crypt.hash(args.password, salt);
+            const user = new User({ ...args, password: hash });
+            const newUser = await user.save();
+            const token = jwt.sign({ id: newUser._id }, config.secret, {
+                expiresIn: 86400 // expires in 24 hours
+            });
+            return { token };
+        } catch (e) {
+            throw new Error(e)
+        }
+    }
+    throw new Error(error);
+}
+
+user.updateUser = async (parentValue, args, context) => {
+    const { _id, userName, firstName, lastName, phoneNumber, email, password, gender, interests } = args;
+    let res = null;
+    if(userName) {
+        res = await validateUserName(userName);
+        if(!res.success) { throw new Error(res.error); }
+    }
+    if(phoneNumber) {
+        res = await validatePhoneNumber(phoneNumber);
+        if(!res.success) { throw new Error(res.error); }
+    }
+    if(email) {
+        res = await validateEmail(email);
+        if(!res.success) { throw new Error(res.error); }
+    }
+    if(password) {
+        res = validatePassword(password);
+        if(!res.success) { throw new Error(res.error); }
+    }
+    if(gender) {
+        res = validateGender(gender);
+        if(!res.success) { throw new Error(res.error); }
+    }
+    if(interests) {
+        res = await validateInterests(interests);
+        if(!res.success) { throw new Error(res.error); }
+    }
+    if(password) {
+        try {
+            const salt = await crypt.genSalt(10);
+            const hash = await crypt.hash(args.password, salt);
+            return User.findByIdAndUpdate(_id, {...args, password: hash}, { new: true });
+        } catch (e) {
+            throw new Error(e);
+        }
+    }
+    return User.findByIdAndUpdate(_id, {...args}, { new: true });
+}
+
+user.deleteUser = async (parentValue, { _id }, context) => {
+    return User.findByIdAndUpdate(_id, { isDeleted: true }, { new: true });
 }
 
 const validateProvidedUserInfo = async (user) => {

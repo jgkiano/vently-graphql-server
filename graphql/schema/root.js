@@ -274,7 +274,7 @@ const mutation = new GraphQLObjectType({
             },
             resolve: interest.updateInterest
         },
-        removeInterest: {
+        deleteInterest: {
             type: InterestType,
             args: {
                 _id: { type: GraphQLNonNull(GraphQLID) }
@@ -294,6 +294,28 @@ const mutation = new GraphQLObjectType({
                 interests: { type: GraphQLList(GraphQLString) },
             },
             resolve: user.createUser
+        },
+        updateUser: {
+            type: UserType,
+            args: {
+                _id: { type: GraphQLNonNull(GraphQLID) },
+                userName: { type: GraphQLString },
+                firstName: { type: GraphQLString },
+                lastName: { type: GraphQLString },
+                phoneNumber: { type: GraphQLString },
+                email: { type: GraphQLString },
+                password: { type: GraphQLString },
+                gender: { type: GraphQLString },
+                interests: { type: GraphQLList(GraphQLString) },
+            },
+            resolve: user.updateUser
+        },
+        deleteUser: {
+            type: UserType,
+            args: {
+                _id: { type: GraphQLNonNull(GraphQLID) }
+            },
+            resolve: user.deleteUser
         }
     }
 });

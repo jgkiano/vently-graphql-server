@@ -246,11 +246,13 @@ const RootQuery = new GraphQLObjectType({
         },
         interest: {
             type: InterestType,
-            args: { _id: { type: GraphQLID } },
-            resolve(parentValue, args, context) {
-                return mock.interests(true);
-            }
-        }
+            args: { _id: { type: GraphQLNonNull(GraphQLID) } },
+            resolve: interest.readInterest
+        },
+        interests: {
+            type: GraphQLList(InterestType),
+            resolve: interest.readInterest
+        },
     }
 });
 
@@ -271,6 +273,13 @@ const mutation = new GraphQLObjectType({
                 name: { type: GraphQLNonNull(GraphQLString) },
             },
             resolve: interest.updateInterest
+        },
+        removeInterest: {
+            type: InterestType,
+            args: {
+                _id: { type: GraphQLNonNull(GraphQLID) }
+            },
+            resolve: interest.deleteInterest
         },
         createUser: {
             type: TokenType,

@@ -5,7 +5,8 @@ const controllers = require('./db/controllers');
 
 const {
     interest,
-    user
+    user,
+    event
 } = controllers;
 
 const {
@@ -318,6 +319,23 @@ const mutation = new GraphQLObjectType({
                 _id: { type: GraphQLNonNull(GraphQLID) }
             },
             resolve: user.deleteUser
+        },
+        createEvent: {
+            type: EventType,
+            args: {
+                name: { type: GraphQLNonNull(GraphQLString) },
+                startDate: { type: GraphQLNonNull(GraphQLString) },
+                endDate: { type: GraphQLNonNull(GraphQLString) },
+                locationName: { type: GraphQLNonNull(GraphQLString) },
+                lat: { type: GraphQLNonNull(GraphQLFloat) },
+                lng: { type: GraphQLNonNull(GraphQLFloat) },
+                okhi:  { type: GraphQLString },
+                description: { type: GraphQLNonNull(GraphQLString) },
+                bannerUrl: { type: GraphQLNonNull(GraphQLString) },
+                isFree: { type: GraphQLNonNull(GraphQLBoolean) },
+                interest: { type: GraphQLNonNull(GraphQLString) },
+            },
+            resolve: event.createEvent
         }
     }
 });

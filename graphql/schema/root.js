@@ -6,7 +6,8 @@ const controllers = require('./db/controllers');
 const {
     interest,
     user,
-    event
+    event,
+    ticket
 } = controllers;
 
 const {
@@ -17,7 +18,8 @@ const {
     GraphQLInt,
     GraphQLBoolean,
     GraphQLList,
-    GraphQLNonNull
+    GraphQLNonNull,
+    GraphQLInputObjectType
 } = graphql;
 
 const UserType = new GraphQLObjectType({
@@ -149,6 +151,15 @@ const TicketType = new GraphQLObjectType({
         }
     })
 });
+
+const InboundTicketType = new GraphQLInputObjectType({
+    name: 'InboundTicketType',
+    fields: () => ({
+        type: { type: GraphQLString },
+        price: { type: GraphQLFloat },
+        ticketsLeft: { type: GraphQLInt }
+    })
+})
 
 const TransactionType = new GraphQLObjectType({
     name: 'TransactionType',
@@ -336,6 +347,7 @@ const mutation = new GraphQLObjectType({
                 bannerUrl: { type: GraphQLNonNull(GraphQLString) },
                 isFree: { type: GraphQLNonNull(GraphQLBoolean) },
                 interest: { type: GraphQLNonNull(GraphQLString) },
+                tickets: { type: GraphQLList(InboundTicketType)}
             },
             resolve: event.createEvent
         },
@@ -364,6 +376,14 @@ const mutation = new GraphQLObjectType({
             },
             resolve: event.deleteEvent
         },
+        createTickets: {
+            type: EventType,
+            args: {
+                eventId: { type: GraphQLNonNull(GraphQLID) },
+                tickets: { type: GraphQLList(InboundTicketType) }
+            },
+            resolve: ticket.createTickets
+        }
     }
 });
 

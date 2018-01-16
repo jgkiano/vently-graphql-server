@@ -17,7 +17,11 @@ const ticketSchema = new Schema({
         type: String,
         required: true,
         default: 'KES'
-    }
+    },
+    type: {
+        type: String,
+        required: true
+    },
     originalOwner: {
         type : mongoose.Schema.Types.ObjectId, ref: 'User'
     },

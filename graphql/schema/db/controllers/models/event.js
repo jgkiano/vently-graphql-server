@@ -50,6 +50,15 @@ const eventSchema = new Schema({
         required: true,
         default: false
     },
+    isFree: {
+        type: Boolean,
+        required: true
+    },
+    tickets: [{
+        type: { type: String, required: true },
+        price: { type: Number, required: true },
+        ticketsLeft: { type: Number, required: true }
+    }],
     interest: {
         type : mongoose.Schema.Types.ObjectId, ref: 'Interest',
         required: true

@@ -1,0 +1,24 @@
+mutation {
+  createEvent(
+    name: "asdas"
+    startDate: "2018-2-15 09:00"
+    endDate: "2018-2-15 12:00"
+    locationName: "sdasda"
+    lat: -1.3454545
+    lng: 36.3243234
+    description: "Quisque velit nisi, pretium ut lacinia in, elementum id enim. Proin eget tortor risus."
+    bannerUrl: "asdasda"
+    isFree: false
+    interest: "5a5797feb4d4d734189515dc"
+    tickets: [
+      {
+        type: "vip",
+        price: 500,
+        ticketsLeft: 1000
+      }
+    ]
+  ) {
+    _id
+    name
+  }
+}

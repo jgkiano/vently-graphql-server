@@ -221,10 +221,12 @@ const RootQuery = new GraphQLObjectType({
         },
         event: {
             type: EventType,
-            args: { _id: { type: GraphQLID } },
-            resolve (parentValue, args, context) {
-                return mock.events(true);
-            }
+            args: { _id: { type: GraphQLNonNull(GraphQLID) } },
+            resolve: event.readEvent
+        },
+        events: {
+            type: GraphQLList(EventType),
+            resolve: event.readEvent
         },
         ticket: {
             type: TicketType,
@@ -336,7 +338,32 @@ const mutation = new GraphQLObjectType({
                 interest: { type: GraphQLNonNull(GraphQLString) },
             },
             resolve: event.createEvent
-        }
+        },
+        updateEvent: {
+            type: EventType,
+            args: {
+                _id: { type: GraphQLNonNull(GraphQLID) },
+                name: { type: GraphQLString },
+                startDate: { type: GraphQLString },
+                endDate: { type: GraphQLString },
+                locationName: { type: GraphQLString },
+                lat: { type: GraphQLFloat },
+                lng: { type: GraphQLFloat },
+                okhi:  { type: GraphQLString },
+                description: { type: GraphQLString },
+                bannerUrl: { type: GraphQLString },
+                isFree: { type: GraphQLBoolean },
+                interest: { type:GraphQLString },
+            },
+            resolve: event.updateEvent
+        },
+        deleteEvent: {
+            type: EventType,
+            args: {
+                _id: { type: GraphQLNonNull(GraphQLID) }
+            },
+            resolve: event.deleteEvent
+        },
     }
 });
 

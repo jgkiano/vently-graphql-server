@@ -7,7 +7,8 @@ const {
     interest,
     user,
     event,
-    ticket
+    ticket,
+    transaction
 } = controllers;
 
 const {
@@ -44,9 +45,7 @@ const UserType = new GraphQLObjectType({
         },
         transactions: {
             type: new GraphQLList(TransactionType),
-            resolve(parentValue, args) {
-                return mock.transactions()
-            }
+            resolve: transaction.getAllUserTransactions
         }
     })
 });

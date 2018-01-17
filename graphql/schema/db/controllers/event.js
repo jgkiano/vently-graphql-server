@@ -3,6 +3,7 @@ const moment = require('moment');
 
 const {
     Event,
+    EventTickets,
     Interest
 } = models;
 
@@ -21,13 +22,17 @@ event.createEvent = async (parentValue, args, context) => {
 
 event.readEvent = async (parentValue, { _id }, context) => {
     if(_id) { return Event.findById(_id); }
+    if(parentValue.eventId) { return Event.findById(parentValue.eventId); }
     return Event.find({});
 }
 
 event.updateEvent = async (parentValue, args, context) => {
-    const { startDate, endDate, interest, _id } = args;
+    const { startDate, endDate, interest, tickets, _id } = args;
     const event = await Event.findById(_id);
     const currentTime = moment();
+    if(!event) {
+        throw new Error('invalid event');
+    }
     if(startDate && moment(startDate).diff(currentTime, 'days') < DAYS_BEFORE_EVENT) {
         throw new Error(`event must start atleast ${DAYS_BEFORE_EVENT} days before the current date`);
     }
@@ -59,6 +64,10 @@ const validateEventDate = async (event) => {
         return { error: `invlaid interest provided` };
     }
     return { success: true };
+}
+
+event.getEventTickets = async ({ _id }, args, context) => {
+    return EventTickets.find({ eventId: _id });
 }
 
 

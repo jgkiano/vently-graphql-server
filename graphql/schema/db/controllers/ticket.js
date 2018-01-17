@@ -2,45 +2,23 @@ const models = require('./models');
 
 const {
     Ticket,
-    Event
+    Event,
+    EventTickets
 } = models;
 
 const ticket = {};
 
-const MAX_AMOUNT_OF_TICKETS_TO_BE_GENERATED = 100;
-
-ticket.createTickets = async (parentValue, args, context) => {
-    const { eventId, tickets } = args;
-    if( ! (await Event.findById(eventId)) ) {
-        throw new Error('event provided is invalid');
+ticket.createEventTickets = async (parentValue, args, context) => {
+    const { eventId, type, price, ticketsLeft } = args;
+    if( ! ( await Event.findById(eventId) ) ) {
+        throw new Error('invalid event provided');
     }
-    tickets.forEach((ticket) => {
-        if(!ticket.type || !ticket.price || !ticket.amountToBeGenerated) {
-            throw new Error('invalid ticket parameters');
-        }
-        if(!tickets.amountToBeGenerated > MAX_AMOUNT_OF_TICKETS_TO_BE_GENERATED) {
-            throw new Error('tickets to be generated for a specific type has exceeded the maximum limit allowed');
-        }
-    });
-    let tempTickets = [];
-    let newTicket = null;
-    try {
-        for (let ticket of tickets) {
-            const { type, price, amountToBeGenerated } = ticket;
-            for (var i = 0; i < amountToBeGenerated; i++) {
-                tempTickets.push({ type, price });
-            }
-            for (let tempTicket of tempTickets) {
-                newTicket = new Ticket({ ...tempTicket, eventId });
-                await newTicket.save();
-                console.log('ticket generated');
-            }
-            tempTickets = [];
-        }
-        return Event.findById(eventId);
-    } catch (e) {
-        throw new Error(e);
+    const res =  await EventTickets.findOne({ eventId, type });
+    if(res) {
+        throw new Error('event type already exists for this event');
     }
+    const eventTicket = new EventTickets({ ...args, type: args.type.toLowerCase() });
+    return eventTicket.save();
 }
 
 module.exports = ticket;

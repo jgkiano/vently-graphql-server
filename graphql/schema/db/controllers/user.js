@@ -78,6 +78,17 @@ user.deleteUser = async (parentValue, { _id }, context) => {
     return User.findByIdAndUpdate(_id, { isDeleted: true }, { new: true });
 }
 
+user.getInterests = async ({ _id }, args, context) => {
+    try {
+        const user = await User.findById(_id).populate('interests');
+        if(user) { return user.interests }
+        throw new Error('user does not exist');
+    } catch (e) {
+        throw new Error(e);
+    }
+
+}
+
 const validateProvidedUserInfo = async (user) => {
     const {
         userName,

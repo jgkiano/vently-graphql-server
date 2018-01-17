@@ -36,9 +36,7 @@ const UserType = new GraphQLObjectType({
         isActivated: { type: GraphQLBoolean },
         interests: {
             type: new GraphQLList(InterestType),
-            resolve(parentValue, args) {
-                return mock.interests()
-            }
+            resolve: user.getInterests
         },
         tickets: {
             type: new GraphQLList(TicketType),
@@ -75,6 +73,23 @@ const EventManagerType = new GraphQLObjectType({
     })
 });
 
+const EventTicketsType = new GraphQLObjectType({
+    name: 'EventTicketsType',
+    fields: () => ({
+        _id: { type: GraphQLID },
+        eventId: { type: GraphQLID },
+        type: { type: GraphQLString },
+        description: { type: GraphQLString },
+        price: { type: GraphQLFloat },
+        currency: { type: GraphQLString },
+        ticketsLeft: { type: GraphQLInt },
+        event: {
+            type: EventType,
+            resolve: event.readEvent
+        }
+    })
+});
+
 const EventType = new GraphQLObjectType({
     name: 'EventType',
     fields: () => ({
@@ -91,16 +106,14 @@ const EventType = new GraphQLObjectType({
         isActive: { type: GraphQLBoolean },
         isClosed: { type: GraphQLBoolean },
         isFree: { type: GraphQLBoolean },
+        tickets: {
+            type: new GraphQLList(EventTicketsType),
+            resolve: event.getEventTickets
+        },
         eventManager: {
             type: EventManagerType,
             resolve(parentValue, args) {
                 return mock.eventManagers(true)
-            }
-        },
-        tickets: {
-            type: new GraphQLList(TicketType),
-            resolve(parentValue, args) {
-                return mock.tickets()
             }
         },
         attendees: {
@@ -151,15 +164,6 @@ const TicketType = new GraphQLObjectType({
         }
     })
 });
-
-const InboundTicketType = new GraphQLInputObjectType({
-    name: 'InboundTicketType',
-    fields: () => ({
-        type: { type: GraphQLString },
-        price: { type: GraphQLFloat },
-        ticketsLeft: { type: GraphQLInt }
-    })
-})
 
 const TransactionType = new GraphQLObjectType({
     name: 'TransactionType',
@@ -346,8 +350,7 @@ const mutation = new GraphQLObjectType({
                 description: { type: GraphQLNonNull(GraphQLString) },
                 bannerUrl: { type: GraphQLNonNull(GraphQLString) },
                 isFree: { type: GraphQLNonNull(GraphQLBoolean) },
-                interest: { type: GraphQLNonNull(GraphQLString) },
-                tickets: { type: GraphQLList(InboundTicketType)}
+                interest: { type: GraphQLNonNull(GraphQLString) }
             },
             resolve: event.createEvent
         },
@@ -365,7 +368,7 @@ const mutation = new GraphQLObjectType({
                 description: { type: GraphQLString },
                 bannerUrl: { type: GraphQLString },
                 isFree: { type: GraphQLBoolean },
-                interest: { type:GraphQLString },
+                interest: { type:GraphQLString }
             },
             resolve: event.updateEvent
         },
@@ -376,13 +379,17 @@ const mutation = new GraphQLObjectType({
             },
             resolve: event.deleteEvent
         },
-        createTickets: {
-            type: EventType,
+        createEventTickets: {
+            type: EventTicketsType,
             args: {
                 eventId: { type: GraphQLNonNull(GraphQLID) },
-                tickets: { type: GraphQLList(InboundTicketType) }
+                type: { type: GraphQLNonNull(GraphQLString) },
+                description: { type: GraphQLNonNull(GraphQLString) },
+                price: { type: GraphQLNonNull(GraphQLFloat) },
+                currency: { type: GraphQLString },
+                ticketsLeft: { type: GraphQLNonNull(GraphQLInt) }
             },
-            resolve: ticket.createTickets
+            resolve: ticket.createEventTickets
         }
     }
 });

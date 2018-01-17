@@ -42,7 +42,12 @@ const transactionSchema = new Schema({
                 required: true
             }
         }
-    ]
+    ],
+    pesapalTransactionId: {
+        type: String,
+        required: true,
+        default: 'n/a'
+    }
 });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);

@@ -24,13 +24,14 @@ transaction.createTransaction = async (parentValue, args, context) => {
         const eventInfo = await getEventInfo(tickets);
         const transactionAmount = await calculateTransactionTotal(tickets)
         const transactionReference = generateTransactionRef(transactionAmount, userId);
+        const transaction = new Transaction({ userId, transactionAmount, transactionReference, tickets });
+        const { _id } = await transaction.save();
 
         const PesaPal = getPesaPal();
         const customer = new PesaPal.Customer(user.email, user.phoneNumber);
-        const order = new PesaPal.Order(transactionReference, customer, `${eventInfo.name} tickets`, transactionAmount, "KES", "MERCHANT");
+        const order = new PesaPal.Order(_id, customer, `${eventInfo.name} tickets`, transactionAmount, "KES", "MERCHANT");
         const url = PesaPal.getPaymentURL(order, "http://localhost:3000/paymentconfirmation");
-        const transaction = new Transaction({ userId, transactionAmount, transactionReference, tickets });
-        transaction.save().then(() => console.log('saved')).catch((error) => console.log(error))
+
         return { link: url };
     } catch (e) {
         throw new Error(e);

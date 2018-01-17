@@ -86,7 +86,6 @@ user.getInterests = async ({ _id }, args, context) => {
     } catch (e) {
         throw new Error(e);
     }
-
 }
 
 const validateProvidedUserInfo = async (user) => {

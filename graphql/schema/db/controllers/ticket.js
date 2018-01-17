@@ -21,4 +21,8 @@ ticket.createEventTickets = async (parentValue, args, context) => {
     return eventTicket.save();
 }
 
+ticket.getAllUserTickets = async ({ _id }, args, context) => {
+    return Ticket.find({ currentOwner: _id });
+}
+
 module.exports = ticket;

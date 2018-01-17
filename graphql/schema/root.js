@@ -40,9 +40,7 @@ const UserType = new GraphQLObjectType({
         },
         tickets: {
             type: new GraphQLList(TicketType),
-            resolve(parentValue, args) {
-                return mock.tickets()
-            }
+            resolve: ticket.getAllUserTickets
         },
         transactions: {
             type: new GraphQLList(TransactionType),

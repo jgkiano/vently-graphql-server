@@ -28,9 +28,6 @@ const ticketSchema = new Schema({
     currentOwner: {
         type : mongoose.Schema.Types.ObjectId, ref: 'User'
     },
-    currentOwner: {
-        type : mongoose.Schema.Types.ObjectId, ref: 'User'
-    },
     transactionId: {
         type : mongoose.Schema.Types.ObjectId, ref: 'Transaction',
     },

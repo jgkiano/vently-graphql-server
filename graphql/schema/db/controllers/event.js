@@ -4,7 +4,9 @@ const moment = require('moment');
 const {
     Event,
     EventTickets,
-    Interest
+    Interest,
+    EventManager,
+    Ticket
 } = models;
 
 const event = {};
@@ -14,7 +16,10 @@ const DAYS_BEFORE_EVENT = 14;
 event.createEvent = async (parentValue, args, context) => {
     const res = await validateEventDate(args);
     if(res.success) {
-        const newEvent = new Event(args);
+        if( !args.eventManagerId || ! (await EventManager.findById(args.eventManagerId)) ) {
+            throw new Error('invalid event manager provided');
+        }
+        const newEvent = new Event({ ...args, eventManager: args.eventManagerId });
         return newEvent.save();
     }
     throw new Error(res.error);
@@ -22,7 +27,7 @@ event.createEvent = async (parentValue, args, context) => {
 
 event.readEvent = async (parentValue, { _id }, context) => {
     if(_id) { return Event.findById(_id); }
-    if(parentValue.eventId) { return Event.findById(parentValue.eventId); }
+    if(parentValue && parentValue.eventId) { return Event.findById(parentValue.eventId); }
     return Event.find({});
 }
 
@@ -68,6 +73,18 @@ const validateEventDate = async (event) => {
 
 event.getEventTickets = async ({ _id }, args, context) => {
     return EventTickets.find({ eventId: _id });
+}
+
+event.getEventManager = async ({ eventManager }) => {
+    return EventManager.findById(eventManager);
+}
+
+event.getAttendees = async ({ _id }) => {
+    const tickets = await Ticket.find({ eventId: _id }).populate('currentOwner');
+    if(tickets.length > 0) {
+        console.log(tickets);
+    }
+    return [];
 }
 
 

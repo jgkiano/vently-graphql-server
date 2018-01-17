@@ -2,9 +2,11 @@ const models = require('./models');
 const crypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('./config');
+const casual = require('casual');
 
 const {
-    EventManager
+    EventManager,
+    Event
 } = models;
 
 const eventManager = {};
@@ -26,6 +28,36 @@ eventManager.createEventManager = async (parentValue, args, context) => {
         }
     }
     throw new Error(error);
+}
+
+eventManager.updateEventManager = async (parentValue, args, context) => {
+    const { phoneNumber, email, _id } = args;
+    let res = null;
+    if(email) {
+        res = await validateEmail(email);
+        if(res.error) { throw new Error(res.error) }
+    }
+    if(phoneNumber) {
+        res = await validatePhoneNumber(phoneNumber);
+        if(res.error) { throw new Error(res.error) }
+    }
+    if(phoneNumber) {
+        return EventManager.findByIdAndUpdate(_id, { ...args, isVerified: false, verificationCode: casual.integer(from = 1000, to = 9999) }, { new: true });
+    }
+    return EventManager.findByIdAndUpdate(_id, { ...args }, { new: true });
+}
+
+eventManager.deleteEventManager = async (parentValue, { _id }, context) => {
+    return EventManager.findByIdAndUpdate(_id, { isDeleted: true }, { new: true });
+}
+
+eventManager.readEventManager = async (parentValue, { _id }, context ) => {
+    if(_id) { return EventManager.findById(_id); }
+    return EventManager.find({});
+}
+
+eventManager.getEvents = async ({ _id }) => {
+    return Event.find({ eventManager: _id });
 }
 
 const validateProvidedUserInfo = async (eventManager) => {

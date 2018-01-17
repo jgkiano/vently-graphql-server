@@ -28,8 +28,9 @@ mutation {
     firstName: "Julius"
     lastName: "Kiano"
     phoneNumber: "+254700110590"
-    email: "jgkiano@gmail.com"
+    email: "jgkianoo@gmail.com"
     password: "Godrick93"
-    gender: "male"
-  )
+  ) {
+    token
+  }
 }

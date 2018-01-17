@@ -35,7 +35,7 @@ const UserType = new GraphQLObjectType({
         email: { type: GraphQLString },
         gender: { type: GraphQLString },
         verificationCode: { type: GraphQLInt },
-        isActivated: { type: GraphQLBoolean },
+        isVerified: { type: GraphQLBoolean },
         interests: {
             type: new GraphQLList(InterestType),
             resolve: user.getInterests
@@ -78,12 +78,10 @@ const EventManagerType = new GraphQLObjectType({
         email: { type: GraphQLString },
         gender: { type: GraphQLString },
         verificationCode: { type: GraphQLInt },
-        isActivated: { type: GraphQLBoolean },
+        isVerified: { type: GraphQLBoolean },
         events: {
             type: new GraphQLList(EventType),
-            resolve(parentValue, args) {
-                return mock.events()
-            }
+            resolve: eventManager.getEvents
         }
     })
 });
@@ -110,15 +108,11 @@ const EventType = new GraphQLObjectType({
         },
         eventManager: {
             type: EventManagerType,
-            resolve(parentValue, args) {
-                return mock.eventManagers(true)
-            }
+            resolve: event.getEventManager
         },
         attendees: {
             type: new GraphQLList(UserType),
-            resolve(parentValue, args) {
-                return mock.users()
-            }
+            resolve: event.getAttendees
         }
     })
 });
@@ -241,6 +235,24 @@ const RootQuery = new GraphQLObjectType({
             type: GraphQLList(EventType),
             resolve: event.readEvent
         },
+        eventManager: {
+            type: EventManagerType,
+            args: { _id: { type: GraphQLID } },
+            resolve: eventManager.readEventManager
+        },
+        eventManagers: {
+            type : GraphQLList(EventManagerType),
+            resolve: eventManager.readEventManager
+        },
+        interest: {
+            type: InterestType,
+            args: { _id: { type: GraphQLNonNull(GraphQLID) } },
+            resolve: interest.readInterest
+        },
+        interests: {
+            type: GraphQLList(InterestType),
+            resolve: interest.readInterest
+        },
         ticket: {
             type: TicketType,
             args: { _id: { type: GraphQLID } },
@@ -254,23 +266,7 @@ const RootQuery = new GraphQLObjectType({
             resolve(parentValue, args, context) {
                 return mock.transactions(true);
             }
-        },
-        eventManager: {
-            type: EventManagerType,
-            args: { _id: { type: GraphQLID } },
-            resolve(parentValue, args, context) {
-                return mock.eventManagers(true);
-            }
-        },
-        interest: {
-            type: InterestType,
-            args: { _id: { type: GraphQLNonNull(GraphQLID) } },
-            resolve: interest.readInterest
-        },
-        interests: {
-            type: GraphQLList(InterestType),
-            resolve: interest.readInterest
-        },
+        }
     }
 });
 
@@ -347,9 +343,30 @@ const mutation = new GraphQLObjectType({
             },
             resolve: eventManager.createEventManager
         },
+        updateEventManager: {
+            type: EventManagerType,
+            args: {
+                _id: { type: GraphQLNonNull(GraphQLID) },
+                firstName: { type: GraphQLString },
+                lastName: { type: GraphQLString },
+                phoneNumber: { type: GraphQLString },
+                email: { type: GraphQLString },
+                password: { type: GraphQLString },
+                gender: { type: GraphQLString },
+            },
+            resolve: eventManager.updateEventManager
+        },
+        deleteEventManager: {
+            type: EventManagerType,
+            args: {
+                _id: { type: GraphQLNonNull(GraphQLID) }
+            },
+            resolve: eventManager.deleteEventManager
+        },
         createEvent: {
             type: EventType,
             args: {
+                eventManagerId: { type: GraphQLNonNull(GraphQLID) },
                 name: { type: GraphQLNonNull(GraphQLString) },
                 startDate: { type: GraphQLNonNull(GraphQLString) },
                 endDate: { type: GraphQLNonNull(GraphQLString) },
@@ -400,6 +417,16 @@ const mutation = new GraphQLObjectType({
                 ticketsLeft: { type: GraphQLNonNull(GraphQLInt) }
             },
             resolve: ticket.createEventTickets
+        },
+        updateEventTicket: {
+            type: EventTicketsType,
+            args: {
+                _id: { type: GraphQLNonNull(GraphQLID) },
+                type: { type: GraphQLString },
+                description: { type: GraphQLString },
+                ticketsLeft: { type: GraphQLInt }
+            },
+            resolve: ticket.updateEventTickets
         }
     }
 });

@@ -25,4 +25,25 @@ ticket.getAllUserTickets = async ({ _id }, args, context) => {
     return Ticket.find({ currentOwner: _id });
 }
 
+ticket.updateEventTickets = async (parentValue, args, context) => {
+    const { _id, type, description, ticketsLeft } = args;
+    const eventTicket = await EventTickets.findById(_id);
+    if(!eventTicket) {
+        throw new Error('invalid event ticket type provided');
+    }
+    if(type) {
+        const { eventId } = eventTicket;
+        const eventTickets = await EventTickets.find({ eventId });
+        eventTickets.forEach((eventTicket) => {
+            if(eventTicket.type === type.toLowerCase()) {
+                throw new Error('event type already exists');
+            }
+        });
+    }
+    if(ticketsLeft < 0) {
+        throw new Error('ticketsLeft can not be less than 0');
+    }
+    return EventTickets.findByIdAndUpdate(_id,args,{new:true});
+}
+
 module.exports = ticket;

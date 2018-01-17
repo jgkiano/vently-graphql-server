@@ -46,4 +46,8 @@ ticket.updateEventTickets = async (parentValue, args, context) => {
     return EventTickets.findByIdAndUpdate(_id,args,{new:true});
 }
 
+ticket.getTicketInfo = async () => {
+    console.log('hit');
+}
+
 module.exports = ticket;

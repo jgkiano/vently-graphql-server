@@ -34,3 +34,35 @@ mutation {
     token
   }
 }
+
+mutation {
+  createUser(
+    userName: "julezKiano"
+    firstName: "Julius"
+    lastName: "Kiano"
+    phoneNumber: "+254700110590"
+    email: "jgkiano@gmail.com"
+    password: "Godrick93"
+    gender: "male"
+  ) {
+    token
+  }
+}
+
+mutation {
+  createTransaction(
+    userId: "5a5f1a40d7a6f91e6704fea4"
+    tickets: [
+      {
+        eventTicketId: "5a5f0837c7ce1c1d5ee4f9e2"
+        totalTickets: 2
+      },
+      {
+        eventTicketId: "5a5f0862c7ce1c1d5ee4f9e3"
+        totalTickets: 1
+      }
+    ]
+  ) {
+    _id
+  }
+}

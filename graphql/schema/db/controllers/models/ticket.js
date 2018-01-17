@@ -5,22 +5,8 @@ const Schema        = mongoose.Schema;
 mongoose.Promise = global.Promise;
 
 const ticketSchema = new Schema({
-    eventId: {
-        type: String,
-        required: true
-    },
-    price: {
-        type: Number,
-        required: true
-    },
-    currency: {
-        type: String,
-        required: true,
-        default: 'KES'
-    },
-    type: {
-        type: String,
-        required: true
+    eventTicket: {
+        type : mongoose.Schema.Types.ObjectId, ref: 'EventTickets'
     },
     originalOwner: {
         type : mongoose.Schema.Types.ObjectId, ref: 'User'

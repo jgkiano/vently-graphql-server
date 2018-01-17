@@ -121,9 +121,10 @@ const TicketType = new GraphQLObjectType({
     name: 'TicketType',
     fields: () => ({
         _id: { type: GraphQLID },
-        type: { type: GraphQLString },
-        price: { type: GraphQLFloat },
-        currency: { type: GraphQLString },
+        ticketInfo: {
+            type: EventTicketsType,
+            resolve: ticket.getTicketInfo
+        },
         originalOwner: {
             type: UserType,
             resolve(parentValue, args) {
@@ -172,12 +173,6 @@ const TransactionType = new GraphQLObjectType({
                 return mock.users(true)
             }
         },
-        event: {
-            type: EventType,
-            resolve(parentValue, args) {
-                return mock.events(true)
-            }
-        },
         tickets: {
             type: GraphQLList(TicketType),
             resolve(parentValue, args) {
@@ -211,6 +206,14 @@ const TokenType = new GraphQLObjectType({
     name: 'TokenType',
     fields: () => ({
         token: { type: GraphQLString }
+    })
+});
+
+const InboundTransactionType = new GraphQLInputObjectType({
+    name: 'InboundTransactionType',
+    fields: () => ({
+        eventTicketId: { type: GraphQLNonNull(GraphQLString) },
+        totalTickets: { type: GraphQLNonNull(GraphQLInt) }
     })
 });
 
@@ -427,6 +430,14 @@ const mutation = new GraphQLObjectType({
                 ticketsLeft: { type: GraphQLInt }
             },
             resolve: ticket.updateEventTickets
+        },
+        createTransaction: {
+            type: GraphQLList(TicketType),
+            args: {
+                userId: { type: GraphQLNonNull(GraphQLID) },
+                tickets: { type: GraphQLNonNull(GraphQLList(InboundTransactionType)) }
+            },
+            resolve: transaction.createTransaction
         }
     }
 });

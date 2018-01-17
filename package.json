@@ -25,10 +25,12 @@
     "express": "^4.16.2",
     "express-graphql": "^0.6.11",
     "graphql": "^0.12.3",
+    "jshashes": "^1.0.7",
     "jsonwebtoken": "^8.1.0",
     "lodash": "^4.17.4",
     "moment": "^2.20.1",
-    "mongoose": "^4.13.9"
+    "mongoose": "^4.13.9",
+    "pesapaljs": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.14.10"

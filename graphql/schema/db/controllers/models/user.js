@@ -1,6 +1,6 @@
 const mongoose      = require('mongoose');
 const Schema        = mongoose.Schema;
-
+const casual        = require('casual');
 //so mongoose can stop throwing that warning
 mongoose.Promise = global.Promise;
 
@@ -34,6 +34,8 @@ const userSchema = new Schema({
     },
     verificationCode: {
         type: Number,
+        required: true,
+        default: casual.integer(from = 1000, to = 9999)
     },
     isVerified: {
         type: Boolean,

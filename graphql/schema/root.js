@@ -8,7 +8,8 @@ const {
     user,
     event,
     ticket,
-    transaction
+    transaction,
+    eventManager
 } = controllers;
 
 const {
@@ -50,6 +51,23 @@ const UserType = new GraphQLObjectType({
     })
 });
 
+const EventTicketsType = new GraphQLObjectType({
+    name: 'EventTicketsType',
+    fields: () => ({
+        _id: { type: GraphQLID },
+        eventId: { type: GraphQLID },
+        type: { type: GraphQLString },
+        description: { type: GraphQLString },
+        price: { type: GraphQLFloat },
+        currency: { type: GraphQLString },
+        ticketsLeft: { type: GraphQLInt },
+        event: {
+            type: EventType,
+            resolve: event.readEvent
+        }
+    })
+});
+
 const EventManagerType = new GraphQLObjectType({
     name: 'EventManagerType',
     fields: () => ({
@@ -66,23 +84,6 @@ const EventManagerType = new GraphQLObjectType({
             resolve(parentValue, args) {
                 return mock.events()
             }
-        }
-    })
-});
-
-const EventTicketsType = new GraphQLObjectType({
-    name: 'EventTicketsType',
-    fields: () => ({
-        _id: { type: GraphQLID },
-        eventId: { type: GraphQLID },
-        type: { type: GraphQLString },
-        description: { type: GraphQLString },
-        price: { type: GraphQLFloat },
-        currency: { type: GraphQLString },
-        ticketsLeft: { type: GraphQLInt },
-        event: {
-            type: EventType,
-            resolve: event.readEvent
         }
     })
 });
@@ -307,7 +308,7 @@ const mutation = new GraphQLObjectType({
                 phoneNumber: { type: GraphQLNonNull(GraphQLString) },
                 email: { type: GraphQLNonNull(GraphQLString) },
                 password: { type: GraphQLNonNull(GraphQLString) },
-                gender: { type: GraphQLNonNull(GraphQLString) },
+                gender: { type: GraphQLString },
                 interests: { type: GraphQLList(GraphQLString) },
             },
             resolve: user.createUser
@@ -333,6 +334,18 @@ const mutation = new GraphQLObjectType({
                 _id: { type: GraphQLNonNull(GraphQLID) }
             },
             resolve: user.deleteUser
+        },
+        createEventManager: {
+            type: TokenType,
+            args: {
+                firstName: { type: GraphQLNonNull(GraphQLString) },
+                lastName: { type: GraphQLNonNull(GraphQLString) },
+                phoneNumber: { type: GraphQLNonNull(GraphQLString) },
+                email: { type: GraphQLNonNull(GraphQLString) },
+                password: { type: GraphQLNonNull(GraphQLString) },
+                gender: { type: GraphQLString },
+            },
+            resolve: eventManager.createEventManager
         },
         createEvent: {
             type: EventType,

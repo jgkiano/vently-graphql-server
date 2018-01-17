@@ -22,3 +22,14 @@ mutation {
     name
   }
 }
+
+mutation {
+  createEventManager(
+    firstName: "Julius"
+    lastName: "Kiano"
+    phoneNumber: "+254700110590"
+    email: "jgkiano@gmail.com"
+    password: "Godrick93"
+    gender: "male"
+  )
+}

@@ -4,6 +4,7 @@ const Event = require('./event');
 const Ticket = require('./ticket');
 const EventTickets = require('./eventTickets');
 const Transaction = require('./transaction');
+const EventManager = require('./eventManager');
 
 module.exports = {
     Interest,
@@ -11,5 +12,6 @@ module.exports = {
     Event,
     Ticket,
     EventTickets,
-    Transaction
+    Transaction,
+    EventManager
 }

@@ -10,7 +10,7 @@ const {
 } = models;
 
 const user = {};
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhNWNjYzQzODc5MWQ5MDM4NTM0M2M4ZiIsImlhdCI6MTUxNjAzMTA0NCwiZXhwIjoxNTE2MTE3NDQ0fQ.BNp5w1Je6dQhKJrBkGvkFvJ6-6QubrSEGgIazmrE0-w
+
 user.createUser = async (parentValue, args, context) => {
     const { success, error } = await validateProvidedUserInfo(args);
     if(success) {
@@ -106,8 +106,7 @@ const validateProvidedUserInfo = async (user) => {
         !lastName ||
         !phoneNumber ||
         !email ||
-        !password ||
-        !gender
+        !password
     ) { return { error: 'missing required infomation' } }
 
     let resp = null;
@@ -122,9 +121,6 @@ const validateProvidedUserInfo = async (user) => {
     if(resp.error) { return resp };
 
     resp = validatePassword(password);
-    if(resp.error) { return resp };
-
-    resp = validateGender(gender);
     if(resp.error) { return resp };
 
     resp = await validateInterests(interests);
@@ -152,7 +148,7 @@ const validateEmail = async (email) => {
 
 const validatePhoneNumber = async (phoneNumber) => {
     const res = await User.findOne({ phoneNumber });
-    if (res) { return { error: 'username is already taken'} }
+    if (res) { return { error: 'phone number already exists'} }
     return { success: true };
 }
 

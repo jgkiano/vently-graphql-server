@@ -127,33 +127,23 @@ const TicketType = new GraphQLObjectType({
         },
         originalOwner: {
             type: UserType,
-            resolve(parentValue, args) {
-                return mock.users(true)
-            }
+            resolve: ticket.getOriginalOwner
         },
         currentOwner: {
             type: UserType,
-            resolve(parentValue, args) {
-                return mock.users(true)
-            }
+            resolve: ticket.getCurrentOwner
         },
         eventManager: {
             type: EventManagerType,
-            resolve(parentValue, args) {
-                return mock.eventManagers(true)
-            }
+            resolve: ticket.getEventManager
         },
         event: {
             type: EventType,
-            resolve(parentValue, args) {
-                return mock.events(true)
-            }
+            resolve: ticket.getEvent
         },
         transaction: {
             type: TransactionType,
-            resolve(parentValue, args) {
-                return mock.transactions(true)
-            }
+            resolve: ticket.getTransaction
         }
     })
 });
@@ -162,11 +152,12 @@ const TransactionType = new GraphQLObjectType({
     name: 'TransactionType',
     fields: () => ({
         _id: { type: GraphQLID },
-        reference: { type: GraphQLString },
-        date: { type: GraphQLString },
-        amount: { type: GraphQLFloat },
-        paymentMethod: { type: GraphQLString },
-        status: { type: GraphQLID },
+        transactionReference: { type: GraphQLString },
+        transactionDate: { type: GraphQLString },
+        transactionAmount: { type: GraphQLFloat },
+        pesapalTransactionId: { type: GraphQLString },
+        transactionPaymentMethod: { type: GraphQLString },
+        status: { type: GraphQLString },
         user: {
             type: UserType,
             resolve(parentValue, args) {
@@ -265,10 +256,8 @@ const RootQuery = new GraphQLObjectType({
         },
         ticket: {
             type: TicketType,
-            args: { _id: { type: GraphQLID } },
-            resolve(parentValue, args, context) {
-                return mock.tickets(true);
-            }
+            args: { _id: { type: GraphQLNonNull(GraphQLID) } },
+            resolve: ticket.readTicket
         },
         transaction: {
             type: TransactionType,

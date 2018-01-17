@@ -3,7 +3,9 @@ const models = require('./models');
 const {
     Ticket,
     Event,
-    EventTickets
+    EventTickets,
+    User,
+    Transaction
 } = models;
 
 const ticket = {};
@@ -46,8 +48,43 @@ ticket.updateEventTickets = async (parentValue, args, context) => {
     return EventTickets.findByIdAndUpdate(_id,args,{new:true});
 }
 
-ticket.getTicketInfo = async () => {
-    console.log('hit');
+ticket.readTicket = async(parentValue, { _id }, context) => {
+    return Ticket.findById(_id);
+}
+
+ticket.getTicketInfo = async({ eventTicket }, args, context) => {
+    return EventTickets.findById(eventTicket);
+}
+
+ticket.getOriginalOwner = async ({ originalOwner }, args, context) => {
+    return User.findById(originalOwner);
+}
+
+ticket.getCurrentOwner = async ({ currentOwner }, args, context) => {
+    return User.findById(currentOwner);
+}
+
+ticket.getEventManager = async ({ eventTicket }, args, context) => {
+    try {
+        const { eventId } = await EventTickets.findById(eventTicket);
+        const { eventManager } = await Event.findById(eventId).populate('eventManager');
+        return eventManager;
+    } catch (e) {
+        throw new Error(e);
+    }
+}
+
+ticket.getEvent = async ({ eventTicket }, args, context) => {
+    try {
+        const { eventId } = await EventTickets.findById(eventTicket).populate('eventId');
+        return eventId;
+    } catch (e) {
+        throw new Error(e);
+    }
+}
+
+ticket.getTransaction = async ({ transactionId }, args, context) => {
+    return Transaction.findById(transactionId);
 }
 
 module.exports = ticket;

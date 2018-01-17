@@ -212,8 +212,15 @@ const TokenType = new GraphQLObjectType({
 const InboundTransactionType = new GraphQLInputObjectType({
     name: 'InboundTransactionType',
     fields: () => ({
-        eventTicketId: { type: GraphQLNonNull(GraphQLString) },
+        eventTicket: { type: GraphQLNonNull(GraphQLID) },
         totalTickets: { type: GraphQLNonNull(GraphQLInt) }
+    })
+});
+
+const PesaPalLinkType = new GraphQLObjectType({
+    name: 'PesaPalLinkType',
+    fields: () => ({
+        link: { type: GraphQLString }
     })
 });
 
@@ -432,7 +439,7 @@ const mutation = new GraphQLObjectType({
             resolve: ticket.updateEventTickets
         },
         createTransaction: {
-            type: GraphQLList(TicketType),
+            type: PesaPalLinkType,
             args: {
                 userId: { type: GraphQLNonNull(GraphQLID) },
                 tickets: { type: GraphQLNonNull(GraphQLList(InboundTransactionType)) }

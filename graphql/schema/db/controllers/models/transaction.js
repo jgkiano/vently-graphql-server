@@ -31,7 +31,18 @@ const transactionSchema = new Schema({
         type: String,
         required: true
     },
-    tickets: [{ type : mongoose.Schema.Types.ObjectId, ref: 'Ticket', default: [] }]
+    tickets: [
+        {
+            eventTicket: {
+                type : mongoose.Schema.Types.ObjectId, ref: 'EventTickets',
+                required: true
+            },
+            totalTickets: {
+                type: Number,
+                required: true
+            }
+        }
+    ]
 });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);

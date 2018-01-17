@@ -54,15 +54,15 @@ mutation {
     userId: "5a5f1a40d7a6f91e6704fea4"
     tickets: [
       {
-        eventTicketId: "5a5f0837c7ce1c1d5ee4f9e2"
+        eventTicket: "5a5f0837c7ce1c1d5ee4f9e2"
         totalTickets: 2
       },
       {
-        eventTicketId: "5a5f0862c7ce1c1d5ee4f9e3"
+        eventTicket: "5a5f0862c7ce1c1d5ee4f9e3"
         totalTickets: 1
       }
     ]
   ) {
-    _id
+    link
   }
 }

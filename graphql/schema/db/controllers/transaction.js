@@ -33,6 +33,7 @@ transaction.createTransaction = async (parentValue, args, context) => {
         const url = PesaPal.getPaymentURL(order, "http://localhost:3000/paymentconfirmation");
 
         return { link: url };
+        
     } catch (e) {
         throw new Error(e);
     }

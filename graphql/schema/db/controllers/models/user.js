@@ -49,7 +49,8 @@ const userSchema = new Schema({
         type: Date,
         default: Date.now
     },
-    interests: [{ type : mongoose.Schema.Types.ObjectId, ref: 'Interest', default: [] }]
+    interests: [{ type : mongoose.Schema.Types.ObjectId, ref: 'Interest', default: [] }],
+    pushTokens: [{ type: String, default: [] }]
 });
 const User = mongoose.model('User', userSchema);
 module.exports = User;

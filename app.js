@@ -5,7 +5,8 @@ const expressGraphQL = require('express-graphql');
 const app = express();
 const schema = require('./graphql/schema');
 const config = require('./config');
-const paymentConfirmation = require('./graphql/schema/db/controllers/payment-confirmation');
+
+const paymentRoutes = require('./graphql/schema/db/controllers/payment-routes');
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = config.mongodb;
@@ -21,6 +22,6 @@ mongoose.connect(MONGO_URI, { useMongoClient: true }, () => console.log('connect
 
 app.use('/graphql', expressGraphQL({ schema, graphiql: true }));
 
-app.get('/paymentconfirmation', paymentConfirmation);
+app.use('/payment', paymentRoutes);
 
 app.listen(PORT, () => console.log(`houston we have lift off 🚀: ${PORT}`))

@@ -30,10 +30,10 @@ transaction.createTransaction = async (parentValue, args, context) => {
         const PesaPal = getPesaPal();
         const customer = new PesaPal.Customer(user.email, user.phoneNumber);
         const order = new PesaPal.Order(_id, customer, `${eventInfo.name} tickets`, transactionAmount, "KES", "MERCHANT");
-        const url = PesaPal.getPaymentURL(order, "http://localhost:3000/paymentconfirmation");
+        const url = PesaPal.getPaymentURL(order, "http://localhost:3000/payment/confirmation");
 
         return { link: url };
-        
+
     } catch (e) {
         throw new Error(e);
     }

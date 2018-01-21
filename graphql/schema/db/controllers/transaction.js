@@ -29,10 +29,16 @@ transaction.createTransaction = async (parentValue, args, context) => {
         const user = await User.findById(userId);
         if(!user) { throw new Error('user does not exist'); }
         const eventInfo = await getEventInfo(tickets);
+        let ticketsUserWillHave = 0;
+        tickets.forEach(({ totalTickets }) => {
+            ticketsUserWillHave = ticketsUserWillHave + totalTickets;
+        });
         const existingTickets = await Ticket.find({ currentOwner: userId, eventId: eventInfo._id });
-        if(existingTickets && existingTickets.length >= MAX_TICKETS_USER_SHOULD_HAVE) {
-            throw new Error('maximum number of tickets owned exceeded');
+        ticketsUserWillHave = ticketsUserWillHave + existingTickets.length;
+        if(ticketsUserWillHave > MAX_TICKETS_USER_SHOULD_HAVE) {
+            throw new Error(`Maximum number of tickets owned exceeded. You can not own more than ${MAX_TICKETS_USER_SHOULD_HAVE} tickets per event`);
         }
+        await checkIfTicketsAvailable(tickets);
         const transactionAmount = await calculateTransactionTotal(tickets);
         const transactionReference = generateTransactionRef(transactionAmount, userId);
         const transaction = new Transaction({
@@ -40,7 +46,8 @@ transaction.createTransaction = async (parentValue, args, context) => {
             transactionAmount,
             transactionPaymentMethod: 'LNMO',
             userId: user._id,
-            tickets
+            tickets,
+            eventId: eventInfo._id
         });
         const newTransaction = await transaction.save();
         const status = await requestLipaNaMpesaOnline(newTransaction, user);
@@ -121,6 +128,14 @@ const calculateTransactionTotal = async (tickets) => {
 const generateTransactionRef = (transactionAmount, userId) => {
     const MD5 = new Hashes.MD5;
     return MD5.hex(`${moment().unix()}${transactionAmount}${userId}`);
+}
+
+const checkIfTicketsAvailable = async (tickets) => {
+    for (let { eventTicket, totalTickets } of tickets) {
+        let { ticketsLeft } = await EventTickets.findById(eventTicket);
+        if(totalTickets > ticketsLeft) { throw new Error('ticket request has exceeded the number of tickets left'); }
+    }
+    return true;
 }
 
 module.exports = transaction;

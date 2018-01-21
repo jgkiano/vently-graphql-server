@@ -25,6 +25,10 @@ const ticketSchema = new Schema({
         type : mongoose.Schema.Types.ObjectId, ref: 'Transaction',
         required: true
     },
+    isClaimed: {
+        type: Boolean,
+        default: false
+    },
     isDeleted: {
         type: Boolean,
         default: false
@@ -32,7 +36,7 @@ const ticketSchema = new Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    },
+    }
 });
 const Ticket = mongoose.model('Ticket', ticketSchema);
 module.exports = Ticket;

@@ -1,3 +1,4 @@
+const axios = require('axios');
 const models = require('./models');
 const Hashes = require('jshashes');
 const moment = require('moment');
@@ -7,8 +8,13 @@ const {
     Transaction,
     EventTickets,
     User,
-    Event
+    Event,
+    Ticket
 } = models;
+
+const MAX_TICKETS_USER_SHOULD_HAVE = 5;
+const SAFCOM_OAUTH_ENDPOINT = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+const SAFCOM_LNMO_REQUEST_ENDPOINT = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
 const transaction = {};
 
@@ -17,75 +23,104 @@ transaction.getAllUserTransactions = async ({ _id }) => {
 }
 
 transaction.createTransaction = async (parentValue, args, context) => {
+    const { userId, tickets } = args;
+    if(!tickets || tickets.length === 0) { throw new Error('please provide tickets to purchase'); }
     try {
-        const { userId, tickets } = args;
         const user = await User.findById(userId);
         if(!user) { throw new Error('user does not exist'); }
         const eventInfo = await getEventInfo(tickets);
-        const transactionAmount = await calculateTransactionTotal(tickets)
+        const existingTickets = await Ticket.find({ currentOwner: userId, eventId: eventInfo._id });
+        if(existingTickets && existingTickets.length >= MAX_TICKETS_USER_SHOULD_HAVE) {
+            throw new Error('maximum number of tickets owned exceeded');
+        }
+        const transactionAmount = await calculateTransactionTotal(tickets);
         const transactionReference = generateTransactionRef(transactionAmount, userId);
-        const transaction = new Transaction({ userId, transactionAmount, transactionReference, tickets });
-        const { _id } = await transaction.save();
+        const transaction = new Transaction({
+            transactionReference,
+            transactionAmount,
+            transactionPaymentMethod: 'LNMO',
+            userId: user._id,
+            tickets
+        });
+        const newTransaction = await transaction.save();
+        const status = await requestLipaNaMpesaOnline(newTransaction, user);
+        if(status) { return { transactionRequestStatus: true }; }
+        return { transactionRequestStatus: false };
+    } catch (e) {
+        throw new Error(e);
+    }
+}
 
-        const PesaPal = getPesaPal();
-        const customer = new PesaPal.Customer(user.email, user.phoneNumber);
-        const order = new PesaPal.Order(_id, customer, `${eventInfo.name} tickets`, transactionAmount, "KES", "MERCHANT");
-        const url = PesaPal.getPaymentURL(order, "http://localhost:3000/payment/confirmation");
+requestLipaNaMpesaOnline = async (transaction, user) => {
+    try {
+        const safcomAuthToken = await getSafcomAuthToken();
+        const requestPayload = config.genMpesaRequestPayload(transaction._id, user.phoneNumber, 1); // remember to change transaction amount from 1 to transaction.transactionAmount
+        const { data } = await axios.post(SAFCOM_LNMO_REQUEST_ENDPOINT, requestPayload, {
+            headers: {
+                Authorization: `Bearer ${safcomAuthToken}`
+            }
+        });
+        const { MerchantRequestID, CheckoutRequestID, ResponseCode, ResponseDescription, CustomerMessage } = data;
+        const updatedTransaction = await Transaction.findByIdAndUpdate(transaction._id, {
+            merchantRequestId: MerchantRequestID,
+            checkoutRequestId: CheckoutRequestID,
+            responseDescription: ResponseDescription,
+            responseCode: ResponseCode,
+            customerMessage: CustomerMessage
+        }, { new: true });
+        if(updatedTransaction.responseCode !== "0") {
+            return false;
+        }
+        return true;
+    } catch (e) {
+        throw new Error(e);
+    }
+}
 
-        return { link: url };
-
+getSafcomAuthToken = async () => {
+    const { safcomAuthBase64 } = config;
+    try {
+        const resp = await axios.get(SAFCOM_OAUTH_ENDPOINT, {
+            headers: {
+                Authorization: safcomAuthBase64
+            }
+        });
+        return resp.data.access_token
     } catch (e) {
         throw new Error(e);
     }
 }
 
 const getEventInfo = async (tickets) => {
-    const [ { eventTicket } ] = tickets;
-    const { eventId } = await EventTickets.findById(eventTicket);
-    const eventInfo = await Event.findById(eventId);
-    return eventInfo;
+    try {
+        const [ { eventTicket } ] = tickets;
+        const { eventId } = await EventTickets.findById(eventTicket);
+        const eventInfo = await Event.findById(eventId);
+        return eventInfo;
+    } catch (e) {
+        throw new Error(e);
+    }
 }
 
 const calculateTransactionTotal = async (tickets) => {
-    let transactionAmount = 0;
-    for ( let { eventTicket, totalTickets} of tickets) {
-        let eventTicketInfo = await EventTickets.findById(eventTicket);
-        if(!eventTicketInfo) {
-            throw new Error('invalid eventticketid provided')
+    try {
+        let transactionAmount = 0;
+        for ( let { eventTicket, totalTickets} of tickets) {
+            let eventTicketInfo = await EventTickets.findById(eventTicket);
+            if(!eventTicketInfo) {
+                throw new Error('invalid eventticketid provided')
+            }
+            transactionAmount = transactionAmount + (eventTicketInfo.price * totalTickets)
         }
-        transactionAmount = transactionAmount + (eventTicketInfo.price * totalTickets)
+        return transactionAmount;
+    } catch (e) {
+        throw new Error(e);
     }
-    return transactionAmount;
 }
 
 const generateTransactionRef = (transactionAmount, userId) => {
     const MD5 = new Hashes.MD5;
     return MD5.hex(`${moment().unix()}${transactionAmount}${userId}`);
 }
-
-const getPesaPal = () => {
-    const PesaPal = require('pesapaljs').init({
-        key: config.pesapalDemoKey,
-        secret: config.pesapalDemoSecret,
-        debug: true // false in production!
-    });
-    return PesaPal;
-}
-
-// const { userId, tickets } = args;
-// let transactionAmount = 0;
-// let eventTicketInfo = null;
-// for ( let { eventTicketId, totalTickets} of tickets) {
-//     eventTicketInfo = await EventTickets.findById(eventTicketId);
-//     if(!eventTicketInfo) {
-//         throw new Error('invalid eventticketid provided')
-//     }
-//     transactionAmount = transactionAmount + (eventTicketInfo.price * totalTickets)
-// }
-// const valueToHash = `${moment().unix()}${transactionAmount}${userId}`;
-// const MD5 = new Hashes.MD5;
-// const transactionReference = MD5.hex(valueToHash);
-// const transaction = new Transaction({ userId, transactionAmount, transactionReference });
-// return transaction.save();
 
 module.exports = transaction;

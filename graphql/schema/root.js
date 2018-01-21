@@ -208,10 +208,10 @@ const InboundTransactionType = new GraphQLInputObjectType({
     })
 });
 
-const PesaPalLinkType = new GraphQLObjectType({
-    name: 'PesaPalLinkType',
+const TransactionRequestStatus = new GraphQLObjectType({
+    name: 'TransactionRequestStatus',
     fields: () => ({
-        link: { type: GraphQLString }
+        transactionRequestStatus: { type: GraphQLBoolean }
     })
 });
 
@@ -428,7 +428,7 @@ const mutation = new GraphQLObjectType({
             resolve: ticket.updateEventTickets
         },
         createTransaction: {
-            type: PesaPalLinkType,
+            type: TransactionRequestStatus,
             args: {
                 userId: { type: GraphQLNonNull(GraphQLID) },
                 tickets: { type: GraphQLNonNull(GraphQLList(InboundTransactionType)) }

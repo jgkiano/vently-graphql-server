@@ -43,10 +43,30 @@ const transactionSchema = new Schema({
             }
         }
     ],
-    pesapalTransactionId: {
+    merchantRequestId: {
         type: String,
         required: true,
-        default: 'n/a'
+        default: 'awaiting'
+    },
+    checkoutRequestId: {
+        type: String,
+        required: true,
+        default: 'awaiting'
+    },
+    responseDescription: {
+        type: String,
+        required: true,
+        default: 'awaiting'
+    },
+    responseCode: {
+        type: String,
+        required: true,
+        default: 'awaiting'
+    },
+    customerMessage: {
+        type: String,
+        required: true,
+        default: 'no message provided'
     }
 });
 

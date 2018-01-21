@@ -5,17 +5,25 @@ const Schema        = mongoose.Schema;
 mongoose.Promise = global.Promise;
 
 const ticketSchema = new Schema({
+    eventId: {
+        type : mongoose.Schema.Types.ObjectId, ref: 'Event',
+        required: true
+    },
     eventTicket: {
-        type : mongoose.Schema.Types.ObjectId, ref: 'EventTickets'
+        type : mongoose.Schema.Types.ObjectId, ref: 'EventTickets',
+        required: true
     },
     originalOwner: {
-        type : mongoose.Schema.Types.ObjectId, ref: 'User'
+        type : mongoose.Schema.Types.ObjectId, ref: 'User',
+        required: true
     },
     currentOwner: {
-        type : mongoose.Schema.Types.ObjectId, ref: 'User'
+        type : mongoose.Schema.Types.ObjectId, ref: 'User',
+        required: true
     },
     transactionId: {
         type : mongoose.Schema.Types.ObjectId, ref: 'Transaction',
+        required: true
     },
     isDeleted: {
         type: Boolean,

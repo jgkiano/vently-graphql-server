@@ -36,6 +36,7 @@ const UserType = new GraphQLObjectType({
         gender: { type: GraphQLString },
         verificationCode: { type: GraphQLInt },
         isVerified: { type: GraphQLBoolean },
+        pushTokens: { type: GraphQLList(GraphQLString) },
         interests: {
             type: new GraphQLList(InterestType),
             resolve: user.getInterests
@@ -47,7 +48,7 @@ const UserType = new GraphQLObjectType({
         transactions: {
             type: new GraphQLList(TransactionType),
             resolve: transaction.getAllUserTransactions
-        }
+        },
     })
 });
 

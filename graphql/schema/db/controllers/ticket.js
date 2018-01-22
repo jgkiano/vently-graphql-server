@@ -24,7 +24,7 @@ ticket.createEventTickets = async (parentValue, args, context) => {
 }
 
 ticket.getAllUserTickets = async ({ _id }, args, context) => {
-    return Ticket.find({ currentOwner: _id });
+    return Ticket.find({ currentOwner: _id, isClaimed: false });
 }
 
 ticket.updateEventTickets = async (parentValue, args, context) => {

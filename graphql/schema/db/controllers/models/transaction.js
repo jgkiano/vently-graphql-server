@@ -31,6 +31,10 @@ const transactionSchema = new Schema({
         type: String,
         required: true
     },
+    eventId: {
+        type : mongoose.Schema.Types.ObjectId, ref: 'Event',
+        required: true
+    },
     tickets: [
         {
             eventTicket: {
@@ -43,10 +47,48 @@ const transactionSchema = new Schema({
             }
         }
     ],
-    pesapalTransactionId: {
+    merchantRequestId: {
         type: String,
         required: true,
-        default: 'n/a'
+        default: 'awaiting'
+    },
+    checkoutRequestId: {
+        type: String,
+        required: true,
+        default: 'awaiting'
+    },
+    responseDescription: {
+        type: String,
+        required: true,
+        default: 'awaiting'
+    },
+    responseCode: {
+        type: String,
+        required: true,
+        default: 'awaiting'
+    },
+    resultDescription: {
+        type: String,
+        required: true,
+        default: 'awaiting'
+    },
+    resultCode: {
+        type: String,
+        required: true,
+        default: 'awaiting'
+    },
+    customerMessage: {
+        type: String,
+        required: true,
+        default: 'no message provided'
+    },
+    mpesaReceiptNumber: {
+        type: String,
+        required: true,
+        default: 'awaiting'
+    },
+    mpesaTransactionDate: {
+        type: Date
     }
 });
 

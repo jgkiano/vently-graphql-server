@@ -6,7 +6,9 @@ const models = require('./models');
 
 const {
     User,
-    Interest
+    Interest,
+    Ticket,
+    Event
 } = models;
 
 const user = {};
@@ -83,6 +85,44 @@ user.getInterests = async ({ _id }, args, context) => {
         const user = await User.findById(_id).populate('interests');
         if(user) { return user.interests }
         throw new Error('user does not exist');
+    } catch (e) {
+        throw new Error(e);
+    }
+}
+
+user.getAttendingEvents = async (parentValue) => {
+    try {
+        const userId = parentValue._id;
+        const userTickets = await Ticket.find({ currentOwner: userId });
+        if(userTickets.length === 0) { return []; }
+        const eventIds = await Ticket.distinct('eventId', { currentOwner: userId });
+        const events = [];
+        for( let eventId of eventIds ) {
+            let event = await Event.findById(eventId);
+            let tickets = userTickets.reduce((arr, userTicket) => {
+                if(userTicket.eventId.equals(eventId)) {
+                    arr.push(userTicket);
+                    return arr;
+                }
+                return arr;
+            },[]);
+            events.push({ event, tickets });
+        }
+        return events;
+    } catch (e) {
+        throw new Error(e);
+    }
+}
+
+user.verifyUser = async (parentValue, args, context) => {
+    try {
+        const { _id, verificationCode } = args;
+        const user = await User.findById(_id);
+        if(user.isVerified) { throw new Error('user is already verified'); }
+        if(user.verificationCode === verificationCode) {
+            return User.findByIdAndUpdate(_id, { isVerified: true });
+        }
+        throw new Error('invalid verification code');
     } catch (e) {
         throw new Error(e);
     }

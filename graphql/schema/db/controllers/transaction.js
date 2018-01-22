@@ -28,6 +28,7 @@ transaction.createTransaction = async (parentValue, args, context) => {
     try {
         const user = await User.findById(userId);
         if(!user) { throw new Error('user does not exist'); }
+        if(!user.isVerified) { throw new Error('user is not verified'); }
         const eventInfo = await getEventInfo(tickets);
         let ticketsUserWillHave = 0;
         tickets.forEach(({ totalTickets }) => {
@@ -50,7 +51,7 @@ transaction.createTransaction = async (parentValue, args, context) => {
             eventId: eventInfo._id
         });
         const newTransaction = await transaction.save();
-        const status = await requestLipaNaMpesaOnline(newTransaction, user);
+        // const status = await requestLipaNaMpesaOnline(newTransaction, user);
         if(status) { return { transactionRequestStatus: true }; }
         return { transactionRequestStatus: false };
     } catch (e) {
@@ -58,7 +59,15 @@ transaction.createTransaction = async (parentValue, args, context) => {
     }
 }
 
-requestLipaNaMpesaOnline = async (transaction, user) => {
+transaction.readTransaction = (parentValue,{ _id }, context) => Transaction.findById(_id);
+
+transaction.getUser = ({ userId }) => User.findById(userId);
+
+transaction.getTickets = ({ _id }) => Ticket.find({ transactionId: _id });
+
+transaction.getEvent = ({ eventId }) => Event.findById(eventId);
+
+const requestLipaNaMpesaOnline = async (transaction, user) => {
     try {
         const safcomAuthToken = await getSafcomAuthToken();
         const requestPayload = config.genMpesaRequestPayload(transaction._id, user.phoneNumber, 1); // remember to change transaction amount from 1 to transaction.transactionAmount
@@ -84,7 +93,7 @@ requestLipaNaMpesaOnline = async (transaction, user) => {
     }
 }
 
-getSafcomAuthToken = async () => {
+const getSafcomAuthToken = async () => {
     const { safcomAuthBase64 } = config;
     try {
         const resp = await axios.get(SAFCOM_OAUTH_ENDPOINT, {

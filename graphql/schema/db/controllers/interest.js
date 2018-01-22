@@ -1,7 +1,9 @@
 const models = require('./models');
 
 const {
-    Interest
+    Interest,
+    Event,
+    User
 } = models;
 
 const interest = {};
@@ -40,6 +42,8 @@ interest.deleteInterest = async (parentValue, { _id, name }, context) => {
     }
 }
 
+interest.getEvents = ({ _id }) => Event.find({ interest: _id });
 
+interest.getUsers = ({ _id }) => User.find({ interests: { $in: [_id] } });
 
 module.exports = interest;

@@ -41,14 +41,22 @@ const UserType = new GraphQLObjectType({
             type: new GraphQLList(InterestType),
             resolve: user.getInterests
         },
-        tickets: {
-            type: new GraphQLList(TicketType),
-            resolve: ticket.getAllUserTickets
+        eventsAttending: {
+            type: new GraphQLList(UserAttendingEventsType),
+            resolve: user.getAttendingEvents
         },
         transactions: {
             type: new GraphQLList(TransactionType),
             resolve: transaction.getAllUserTransactions
         },
+    })
+});
+
+const UserAttendingEventsType = new GraphQLObjectType({
+    name: 'UserAttendingEventsType',
+    fields: () => ({
+        event: { type: EventType },
+        tickets: { type: new GraphQLList(TicketType) }
     })
 });
 
@@ -145,6 +153,9 @@ const TicketType = new GraphQLObjectType({
         transaction: {
             type: TransactionType,
             resolve: ticket.getTransaction
+        },
+        isClaimed: {
+            type: GraphQLBoolean
         }
     })
 });
@@ -156,20 +167,27 @@ const TransactionType = new GraphQLObjectType({
         transactionReference: { type: GraphQLString },
         transactionDate: { type: GraphQLString },
         transactionAmount: { type: GraphQLFloat },
-        pesapalTransactionId: { type: GraphQLString },
         transactionPaymentMethod: { type: GraphQLString },
         status: { type: GraphQLString },
+        checkoutRequestId: { type: GraphQLString },
+        responseDescription: { type: GraphQLString },
+        responseCode: { type: GraphQLString },
+        resultDescription: { type: GraphQLString },
+        resultCode: { type: GraphQLString },
+        customerMessage: { type: GraphQLString },
+        mpesaReceiptNumber: { type: GraphQLString },
+        mpesaTransactionDate: { type: GraphQLString },
         user: {
             type: UserType,
-            resolve(parentValue, args) {
-                return mock.users(true)
-            }
+            resolve: transaction.getUser
         },
         tickets: {
             type: GraphQLList(TicketType),
-            resolve(parentValue, args) {
-                return mock.tickets()
-            }
+            resolve: transaction.getTickets
+        },
+        event: {
+            type: EventType,
+            resolve: transaction.getEvent
         }
     })
 });
@@ -181,15 +199,11 @@ const InterestType = new GraphQLObjectType({
         name: { type: GraphQLString },
         events: {
             type: new GraphQLList(EventType),
-            resolve(parentValue, args) {
-                return mock.events()
-            }
+            resolve: interest.getEvents
         },
         users: {
             type: new GraphQLList(UserType),
-            resolve(parentValue, args) {
-                return mock.users()
-            }
+            resolve: interest.getUsers
         }
     })
 });
@@ -209,12 +223,19 @@ const InboundTransactionType = new GraphQLInputObjectType({
     })
 });
 
-const TransactionRequestStatus = new GraphQLObjectType({
-    name: 'TransactionRequestStatus',
+const TransactionRequestStatusType = new GraphQLObjectType({
+    name: 'TransactionRequestStatusType',
     fields: () => ({
         transactionRequestStatus: { type: GraphQLBoolean }
     })
 });
+
+const TicketTransferResponseType = new GraphQLObjectType({
+    name: 'TicketTransferResponseType',
+    fields: () => ({
+        responseCode: { type: GraphQLInt }
+    })
+})
 
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
@@ -262,10 +283,8 @@ const RootQuery = new GraphQLObjectType({
         },
         transaction: {
             type: TransactionType,
-            args: { _id: { type: GraphQLID } },
-            resolve(parentValue, args, context) {
-                return mock.transactions(true);
-            }
+            args: { _id: { type: GraphQLNonNull(GraphQLID) } },
+            resolve: transaction.readTransaction
         }
     }
 });
@@ -308,6 +327,14 @@ const mutation = new GraphQLObjectType({
                 interests: { type: GraphQLList(GraphQLString) },
             },
             resolve: user.createUser
+        },
+        verifyUser: {
+            type: UserType,
+            args: {
+                _id: { type: GraphQLNonNull(GraphQLID) },
+                verificationCode: { type: GraphQLNonNull(GraphQLInt) },
+            },
+            resolve: user.verifyUser
         },
         updateUser: {
             type: UserType,
@@ -429,12 +456,23 @@ const mutation = new GraphQLObjectType({
             resolve: ticket.updateEventTickets
         },
         createTransaction: {
-            type: TransactionRequestStatus,
+            type: TransactionRequestStatusType,
             args: {
                 userId: { type: GraphQLNonNull(GraphQLID) },
                 tickets: { type: GraphQLNonNull(GraphQLList(InboundTransactionType)) }
             },
             resolve: transaction.createTransaction
+        },
+        transferTicket: {
+            type: TicketTransferResponseType,
+            args: {
+                userId: { type: GraphQLNonNull(GraphQLID) },
+                ticketId: { type: GraphQLNonNull(GraphQLID) },
+                phoneNumber: { type: GraphQLString },
+                userName: { type: GraphQLString },
+                email: { type: GraphQLString },
+            },
+            resolve: ticket.transferTicket
         }
     }
 });

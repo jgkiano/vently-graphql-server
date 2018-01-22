@@ -8,6 +8,7 @@ const {
     Transaction
 } = models;
 
+const MAX_TICKETS_USER_SHOULD_HAVE = 5;
 const ticket = {};
 
 ticket.createEventTickets = async (parentValue, args, context) => {
@@ -83,8 +84,31 @@ ticket.getEvent = async ({ eventTicket }, args, context) => {
     }
 }
 
-ticket.getTransaction = async ({ transactionId }, args, context) => {
-    return Transaction.findById(transactionId);
+ticket.getTransaction = async ({ transactionId }, args, context) => Transaction.findById(transactionId);
+
+ticket.transferTicket = async (parentValue, args, context) => {
+    try {
+        const { userId, ticketId, phoneNumber, userName, email } = args;
+        //not enough info
+        if(!phoneNumber && !userName && !email) { return { responseCode: 3000 }; }
+        let partyB = null;
+        if(phoneNumber && !partyB) { partyB = await User.findOne({ phoneNumber }); }
+        if(userName && !partyB) { partyB = await User.findOne({ userName }); }
+        if(email && !partyB) { partyB = await User.findOne({ email }); }
+        // user not found
+        if(!partyB) { return { responseCode: 3001 }; }
+        if(partyB._id.equals(userId)) { return { responseCode: 3002 }; }
+        const ticket = await Ticket.findById(ticketId);
+        if(!ticket) { return { responseCode: 3003 }; }
+        const partBTickets = await Ticket.find({ currentOwner: partyB._id, eventId: ticket.eventId });
+        if(partBTickets && partBTickets.length >= MAX_TICKETS_USER_SHOULD_HAVE) {
+            return { responseCode: 3004 };
+        }
+        await Ticket.findByIdAndUpdate(ticketId, { currentOwner: partyB._id });
+        return { responseCode: 4000 };
+    } catch (e) {
+        throw new Error(e);
+    }
 }
 
 module.exports = ticket;

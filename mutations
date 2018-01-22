@@ -27,9 +27,9 @@ mutation {
   createEventManager(
     firstName: "Julius"
     lastName: "Kiano"
-    phoneNumber: "+254700110590"
+    phoneNumber: "+254712345678"
     email: "jgkianoo@gmail.com"
-    password: "Godrick93"
+    password: "Saruman4678!"
   ) {
     token
   }
@@ -40,9 +40,9 @@ mutation {
     userName: "julezKiano"
     firstName: "Julius"
     lastName: "Kiano"
-    phoneNumber: "+254700110590"
+    phoneNumber: "+254712345678"
     email: "jgkiano@gmail.com"
-    password: "Godrick93"
+    password: "Saruman4678!"
     gender: "male"
   ) {
     token

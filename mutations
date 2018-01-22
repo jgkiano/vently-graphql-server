@@ -28,7 +28,7 @@ mutation {
     firstName: "Julius"
     lastName: "Kiano"
     phoneNumber: "+254712345678"
-    email: "jgkianoo@gmail.com"
+    email: "jgman@gmail.com"
     password: "Saruman4678!"
   ) {
     token
@@ -41,7 +41,7 @@ mutation {
     firstName: "Julius"
     lastName: "Kiano"
     phoneNumber: "+254712345678"
-    email: "jgkiano@gmail.com"
+    email: "jgman@gmail.com"
     password: "Saruman4678!"
     gender: "male"
   ) {

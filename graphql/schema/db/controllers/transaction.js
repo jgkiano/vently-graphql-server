@@ -1,7 +1,7 @@
 const axios = require('axios');
-const models = require('./models');
-const Hashes = require('jshashes');
 const moment = require('moment');
+const Hashes = require('jshashes');
+const models = require('./models');
 const config = require('./config');
 
 const {
@@ -51,7 +51,7 @@ transaction.createTransaction = async (parentValue, args, context) => {
             eventId: eventInfo._id
         });
         const newTransaction = await transaction.save();
-        // const status = await requestLipaNaMpesaOnline(newTransaction, user);
+        const status = await requestLipaNaMpesaOnline(newTransaction, user);
         if(status) { return { transactionRequestStatus: true }; }
         return { transactionRequestStatus: false };
     } catch (e) {

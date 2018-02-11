@@ -1,18 +1,19 @@
 const express = require('express');
 const moment = require('moment');
 const routes = express();
+const services = require('../services');
 const config = require('../config');
 const models = require('../models');
 const { Transaction, Ticket, EventTickets } = models;
+const { NotificationHelper } = services
 
 routes.post('/', async (req, res) => {
     const updatedTransResult = await updateTransaction(req.body.Body.stkCallback);
     const resultCode = req.body.Body.stkCallback.ResultCode;
     if(updatedTransResult && resultCode === 0) {
         generateTickets(updatedTransResult);
-    } else {
-        console.log('failed transaction');
     }
+    NotificationHelper.sendSMS('transaction', updatedTransResult);
 });
 
 const updateTransaction = async (transaction) => {

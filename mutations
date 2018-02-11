@@ -55,7 +55,7 @@ mutation {
     tickets: [
       {
         eventTicket: "5a5f0837c7ce1c1d5ee4f9e2"
-        totalTickets: 2
+        totalTickets: 1
       },
       {
         eventTicket: "5a5f0862c7ce1c1d5ee4f9e3"

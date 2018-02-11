@@ -3,6 +3,7 @@ const crypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('./config');
 const models = require('./models');
+const services = require('./services');
 
 const {
     User,
@@ -10,6 +11,10 @@ const {
     Ticket,
     Event
 } = models;
+
+const {
+    NotificationHelper
+} = services;
 
 const user = {};
 
@@ -21,6 +26,7 @@ user.createUser = async (parentValue, args, context) => {
             const hash = await crypt.hash(args.password, salt);
             const user = new User({ ...args, password: hash });
             const newUser = await user.save();
+            NotificationHelper.sendSMS('verificationCode', newUser);
             const token = jwt.sign({ id: newUser._id }, config.secret, {
                 expiresIn: 86400 // expires in 24 hours
             });

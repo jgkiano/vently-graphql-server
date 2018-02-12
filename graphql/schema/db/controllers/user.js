@@ -134,6 +134,16 @@ user.verifyUser = async (parentValue, args, context) => {
     }
 }
 
+user.getVently = async (parentValue, { userId, phoneNumber }, context) => {
+    try {
+        NotificationHelper.sendSMS('getVently', { userId, phoneNumber });
+        return { status: true };
+    } catch (e) {
+        console.log(e);
+        return { status: false }
+    }
+}
+
 const validateProvidedUserInfo = async (user) => {
     const {
         userName,

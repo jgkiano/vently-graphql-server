@@ -31,7 +31,8 @@ const {
     EventTicketsType,
     TransactionRequestStatusType,
     TicketTransferResponseType,
-    InboundTransactionType
+    InboundTransactionType,
+    NotifyStatusType
 } = types;
 
 module.exports = new GraphQLObjectType({
@@ -218,6 +219,14 @@ module.exports = new GraphQLObjectType({
                 email: { type: GraphQLString },
             },
             resolve: ticket.transferTicket
+        },
+        getVently: {
+            type: NotifyStatusType,
+            args: {
+                userId: { type: GraphQLNonNull(GraphQLID) },
+                phoneNumber: { type: GraphQLString }
+            },
+            resolve: user.getVently
         }
     }
 });

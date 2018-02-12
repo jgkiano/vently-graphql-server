@@ -233,7 +233,14 @@ const TicketTransferResponseType = new GraphQLObjectType({
     fields: () => ({
         responseCode: { type: GraphQLInt }
     })
-})
+});
+
+const NotifyStatusType = new GraphQLObjectType({
+    name: 'NotifyStatusType',
+    fields: () => ({
+        status: { type: GraphQLBoolean }
+    })
+});
 
 module.exports = {
     UserType,
@@ -247,5 +254,6 @@ module.exports = {
     TokenType,
     InboundTransactionType,
     TransactionRequestStatusType,
-    TicketTransferResponseType
+    TicketTransferResponseType,
+    NotifyStatusType
 };

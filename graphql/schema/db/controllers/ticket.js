@@ -1,4 +1,5 @@
 const models = require('./models');
+const services = require('./services');
 
 const {
     Ticket,
@@ -7,6 +8,10 @@ const {
     User,
     Transaction
 } = models;
+
+const {
+    NotificationHelper
+} = services;
 
 const MAX_TICKETS_USER_SHOULD_HAVE = 5;
 const ticket = {};
@@ -86,25 +91,44 @@ ticket.getEvent = async ({ eventTicket }, args, context) => {
 
 ticket.getTransaction = async ({ transactionId }, args, context) => Transaction.findById(transactionId);
 
+// 3000 - not enough params to find user
+// 3001 - user not found
+// 3002 - user trying to send to them selves
+// 3003 - ticket you're trying to send doesn't exist
+// 3004 - user you're sending to has max tickets
+// 4000 - send success
+
 ticket.transferTicket = async (parentValue, args, context) => {
     try {
+
         const { userId, ticketId, phoneNumber, userName, email } = args;
+
         //not enough info
         if(!phoneNumber && !userName && !email) { return { responseCode: 3000 }; }
+
         let partyB = null;
+
         if(phoneNumber && !partyB) { partyB = await User.findOne({ phoneNumber }); }
+
         if(userName && !partyB) { partyB = await User.findOne({ userName }); }
+
         if(email && !partyB) { partyB = await User.findOne({ email }); }
         // user not found
         if(!partyB) { return { responseCode: 3001 }; }
+
         if(partyB._id.equals(userId)) { return { responseCode: 3002 }; }
-        const ticket = await Ticket.findById(ticketId);
+
+        const ticket = await Ticket.findOne({ _id: ticketId, currentOwner: userId });
+
         if(!ticket) { return { responseCode: 3003 }; }
+
         const partBTickets = await Ticket.find({ currentOwner: partyB._id, eventId: ticket.eventId });
+
         if(partBTickets && partBTickets.length >= MAX_TICKETS_USER_SHOULD_HAVE) {
             return { responseCode: 3004 };
         }
         await Ticket.findByIdAndUpdate(ticketId, { currentOwner: partyB._id });
+        NotificationHelper.sendSMS('ticketTransfer', { partyA: userId, partyB, ticketId });
         return { responseCode: 4000 };
     } catch (e) {
         throw new Error(e);

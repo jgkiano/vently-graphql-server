@@ -26,7 +26,6 @@ user.createUser = async (parentValue, args, context) => {
             const hash = await crypt.hash(args.password, salt);
             const user = new User({ ...args, password: hash });
             const newUser = await user.save();
-            NotificationHelper.sendSMS('verificationCode', newUser);
             const token = jwt.sign({ id: newUser._id }, config.secret, {
                 expiresIn: 86400 // expires in 24 hours
             });
@@ -122,11 +121,11 @@ user.getAttendingEvents = async (parentValue) => {
 
 user.verifyUser = async (parentValue, args, context) => {
     try {
-        const { _id, verificationCode } = args;
-        const user = await User.findById(_id);
+        const { userId, verificationCode } = args;
+        const user = await User.findById(userId);
         if(user.isVerified) { throw new Error('user is already verified'); }
         if(user.verificationCode === verificationCode) {
-            return User.findByIdAndUpdate(_id, { isVerified: true });
+            return User.findByIdAndUpdate(userId, { isVerified: true }, { new: true});
         }
         throw new Error('invalid verification code');
     } catch (e) {
@@ -140,7 +139,19 @@ user.getVently = async (parentValue, { userId, phoneNumber }, context) => {
         return { status: true };
     } catch (e) {
         console.log(e);
-        return { status: false }
+        return { status: false };
+    }
+}
+
+user.sendVerificationCode = async (parentValue, { userId }, context) => {
+    try {
+        const user = await User.findById(userId);
+        if(!user) { throw new Error('user does not exist'); }
+        if(user.isVerified) { throw new Error('user is already verified'); }
+        await NotificationHelper.sendSMS('verificationCode', user);
+        return { status: true };
+    } catch (e) {
+        throw new Error(e);
     }
 }
 
@@ -237,4 +248,5 @@ const validateInterests = async (interets) => {
     }
     return { success: true };
 }
+
 module.exports = user;

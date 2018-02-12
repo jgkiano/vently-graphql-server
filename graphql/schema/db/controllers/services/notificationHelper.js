@@ -21,43 +21,59 @@ NotificationHelper.sendSMS = async (type, data) => {
     try {
         switch (type) {
             case 'transaction':
-                return transactionSMSNotification(data);
+                return await transactionSMSNotification(data);
             case 'verificationCode':
-                return verificationCodeSMSNotification(data);
+                return await verificationCodeSMSNotification(data);
             case 'getVently':
-                return getVently(data);
+                return await getVently(data);
             case 'ticketTransfer':
-                return ticketTransfer(data);
+                return await ticketTransfer(data);
             default:
                 console.log('wtf??');
         }
     } catch (e) {
         console.log(e);
+        throw new Error(e);
     }
 }
 
 const transactionSMSNotification = async (data) => {
-    const { resultCode, userId, transactionAmount, transactionReference } = data;
-    const { firstName, phoneNumber } = await User.findById(userId);
-    let message = '';
-    if(resultCode === '0') {
-        message = `Hi ${firstName}. Your transaction for amount KES ${transactionAmount}.00 is SUCCESSFUL.\nHave fun!`
-    } else {
-        message = `Hi ${firstName}. Your transaction for amount KES ${transactionAmount}.00 has FAILED. Please contact Vently if you require assistance.`
+    try {
+        const { resultCode, userId, transactionAmount, transactionReference } = data;
+        const { firstName, phoneNumber } = await User.findById(userId);
+        let message = '';
+        if(resultCode === '0') {
+            message = `Hi ${firstName}. Your transaction for amount KES ${transactionAmount}.00 is SUCCESSFUL.\nHave fun!`
+        } else {
+            message = `Hi ${firstName}. Your transaction for amount KES ${transactionAmount}.00 has FAILED. Please contact Vently if you require assistance.`
+        }
+        sms.send({ to: phoneNumber, message });
+        return true;
+    } catch (e) {
+        throw new Error(e);
     }
-    sms.send({ to: phoneNumber, message });
 }
 
 const verificationCodeSMSNotification = async (data) => {
-    const { firstName, verificationCode, phoneNumber } = data;
-    let message = `Hi ${firstName}. Welcome to Vently! Your verification code is: ${verificationCode}`;
-    sms.send({ to: phoneNumber, message });
+    try {
+        const { firstName, verificationCode, phoneNumber } = data;
+        let message = `Hi ${firstName}. Welcome to Vently! Your verification code is: ${verificationCode}`;
+        await sms.send({ to: phoneNumber, message });
+        return true;
+    } catch (e) {
+        throw new Error(e);
+    }
 }
 
 const getVently = async ({ userId, phoneNumber }) => {
-    const { firstName } = await User.findById(userId);
-    let message = `Hey there! ${firstName} wants to give you a ticket for an event. Download the Vently app to get it!`;
-    sms.send({ to: phoneNumber, message });
+    try {
+        const { firstName } = await User.findById(userId);
+        let message = `Hey there! ${firstName} wants to give you a ticket for an event. Download the Vently app to get it!`;
+        await sms.send({ to: phoneNumber, message });
+        return true;
+    } catch (e) {
+        throw new Error(e);
+    }
 }
 
 const ticketTransfer = async ({ partyA, partyB, ticketId }) => {
@@ -66,8 +82,9 @@ const ticketTransfer = async ({ partyA, partyB, ticketId }) => {
         const ticketInfo = await Ticket.findById(ticketId).populate('eventId');
         let firstMessage = `Hi ${sendingUser.firstName}. You've SUCCESSFULLY transfered one ticket for ${ticketInfo.eventId.name} to ${partyB.firstName}.`;
         let secondMessage = `Hi ${partyB.firstName}. You've SUCCESSFULLY received one ticket for ${ticketInfo.eventId.name} from ${sendingUser.firstName}.`;
-        sms.send({ to: sendingUser.phoneNumber, message: firstMessage });
-        sms.send({ to: partyB.phoneNumber, message: secondMessage });
+        await sms.send({ to: sendingUser.phoneNumber, message: firstMessage });
+        await sms.send({ to: partyB.phoneNumber, message: secondMessage });
+        return true;
     } catch (e) {
         throw new Error(e);
     }

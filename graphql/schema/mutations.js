@@ -32,7 +32,7 @@ const {
     TransactionRequestStatusType,
     TicketTransferResponseType,
     InboundTransactionType,
-    NotifyStatusType
+    StatusType
 } = types;
 
 module.exports = new GraphQLObjectType({
@@ -74,10 +74,17 @@ module.exports = new GraphQLObjectType({
             },
             resolve: user.createUser
         },
+        sendVerificationCode: {
+            type: StatusType,
+            args: {
+                userId: { type: GraphQLNonNull(GraphQLID) },
+            },
+            resolve: user.sendVerificationCode
+        },
         verifyUser: {
             type: UserType,
             args: {
-                _id: { type: GraphQLNonNull(GraphQLID) },
+                userId: { type: GraphQLNonNull(GraphQLID) },
                 verificationCode: { type: GraphQLNonNull(GraphQLInt) },
             },
             resolve: user.verifyUser
@@ -221,7 +228,7 @@ module.exports = new GraphQLObjectType({
             resolve: ticket.transferTicket
         },
         getVently: {
-            type: NotifyStatusType,
+            type: StatusType,
             args: {
                 userId: { type: GraphQLNonNull(GraphQLID) },
                 phoneNumber: { type: GraphQLString }
